@@ -16,26 +16,35 @@ export function DesktopHeaderClient({ user }: Props) {
   const [showSearch, setShowSearch] = useState(false)
 
   return (
-    <div className='hidden md:flex mx-auto max-w-7xl px-6 h-16 items-center gap-6'>
-      <div className='flex items-center gap-5 shrink-0'>
-        <Link
-          href='/'
-          aria-label='PassPrive home'
-          className='flex items-center'
-        >
-          <Image
-            src='/passpriveLogo.png'
-            alt='PassPrive'
-            width={180}
-            height={58}
-            className='h-12 w-auto object-contain'
-          />
-        </Link>
-        {/* <div className='border border-l border-gray-300  h-10 ' /> */}
-        {!showSearch && <LocationButton variant='desktop' />}
-      </div>
+    <div className='hidden md:flex mx-auto max-w-7xl px-6 h-18 items-center gap-5'>
+      {/* Logo + tagline */}
+      <Link
+        href='/'
+        aria-label='PassPrive home'
+        className='flex flex-col items-start shrink-0'
+      >
+        <Image
+          src='/passpriveLogo.png'
+          alt='PassPrive'
+          width={150}
+          height={44}
+          className='h-9 w-auto object-contain'
+        />
+        <span className='text-[9px] text-brand font-semibold tracking-wide mt-0.5'>
+          Your Pass to the Island&apos;s Best.
+        </span>
+      </Link>
 
+      {/* Divider */}
+      <div className='h-9 w-px bg-gray-200 shrink-0' />
+
+      {/* Location */}
+      {!showSearch && <LocationButton variant='desktop' />}
+
+      {/* Nav — takes remaining space, centered */}
       <HeaderNav />
+
+      {/* Inline search when active */}
       {showSearch && (
         <div className='flex w-72 shrink-0'>
           <SearchBar
@@ -51,5 +60,5 @@ export function DesktopHeaderClient({ user }: Props) {
         onSearchOpen={() => setShowSearch(true)}
       />
     </div>
-  );
+  )
 }

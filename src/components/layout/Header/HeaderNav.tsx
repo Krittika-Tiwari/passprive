@@ -31,12 +31,9 @@ export function HeaderNav() {
             <li key={href} className="flex flex-1 md:flex-none">
               <Link
                 href={href}
-                className={cn(
-                  'flex items-center justify-center transition-colors w-full md:border-b-2 md:justify-start',
-                  isActive ? 'md:border-brand' : 'md:border-transparent'
-                )}
+                className="flex items-center justify-center transition-colors w-full md:w-auto"
               >
-                {/* Mobile: single card wraps icon + label */}
+                {/* Mobile: icon + label card */}
                 <span className={cn(
                   'flex flex-col items-center gap-1 px-5 py-2 rounded-t-xl transition-colors whitespace-nowrap md:hidden border-b-2',
                   isActive ? 'bg-purple-100 border-brand' : 'border-transparent'
@@ -50,10 +47,12 @@ export function HeaderNav() {
                   </span>
                 </span>
 
-                {/* Desktop: plain inline text */}
+                {/* Desktop: pill for active, plain text for inactive */}
                 <span className={cn(
-                  'hidden md:flex items-center gap-1 px-4 text-[13px] font-semibold normal-case whitespace-nowrap',
-                  isActive ? 'text-brand' : 'text-gray-600 hover:text-gray-900'
+                  'hidden md:flex items-center px-4 py-1.5 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors',
+                  isActive
+                    ? 'bg-purple-100 text-brand'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 )}>
                   {label}
                 </span>

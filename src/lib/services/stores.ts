@@ -12,13 +12,28 @@ import type {
   SectionStore,
   HomeSection,
   StoreDetail,
+  EditorialCollection,
+  NewKickInStore,
 } from '@/lib/types/stores'
+
+export async function getNewKickInStores(
+  params: { userLat?: number; userLng?: number; city?: string; limit?: number } = {}
+): Promise<NewKickInStore[]> {
+  const supabase = await createClient()
+  const { data } = await supabase.rpc('get_new_kick_in_stores', {
+    p_user_lat: params.userLat ?? null,
+    p_user_lng: params.userLng ?? null,
+    p_city: params.city ?? null,
+    p_limit: params.limit ?? 6,
+  })
+  return (data ?? []) as NewKickInStore[]
+}
 
 export async function getActiveStores(): Promise<StoreRow[]> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('stores')
-    .select('id, name, slug, category, subcategory, location_name, city, logo_url, cover_image')
+    .select('id, name, slug, category, subcategory, location_name, city, logo_url, cover_image, description, lat, lng, store_offers(id, title, badge_text, discount_value, offer_type)')
     .eq('is_active', true)
     .order('sort_order')
     .order('name')
@@ -82,6 +97,30 @@ export async function getStoreBySlugOrId(slugOrId: string): Promise<StoreDetail 
   }
 }
 
+export async function getEditorialCollections(
+  entityType?: 'STORE' | 'RESTAURANT' | 'BOTH' | ('STORE' | 'RESTAURANT' | 'BOTH')[]
+): Promise<EditorialCollection[]> {
+  const supabase = await createClient()
+  const now = new Date().toISOString()
+
+  let query = supabase
+    .from('editorial_collections')
+    .select('id, slug, title, subtitle, description, cover_image_url, badge_text, source_name, entity_type, city, area, sort_order, is_featured, save_count')
+    .eq('is_active', true)
+    .lte('starts_at', now)
+    .gte('ends_at', now)
+    .order('sort_order')
+    .order('created_at')
+
+  if (entityType) {
+    const types = Array.isArray(entityType) ? entityType : [entityType]
+    query = query.in('entity_type', types)
+  }
+
+  const { data } = await query
+  return (data ?? []) as EditorialCollection[]
+}
+
 export async function getHomeSections(): Promise<HomeSection[]> {
   const supabase = await createClient()
 
@@ -95,7 +134,7 @@ export async function getHomeSections(): Promise<HomeSection[]> {
 
   const { data: items } = await supabase
     .from('stores_home_section_items')
-    .select('section_id, store_id, sort_order, stores(name, slug, logo_url, location_name, city)')
+    .select('section_id, store_id, sort_order, stores(name, slug, logo_url, location_name, city, lat, lng)')
     .in('section_id', sections.map(s => s.id))
     .eq('is_active', true)
     .order('sort_order')

@@ -8,9 +8,65 @@ const plusJakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.passprive.com";
+
 export const metadata: Metadata = {
-  title: "PassPrive",
-  description: "Discover restaurants, explore menus, book tables, pay bills — all in one place.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "PassPrivé — Exclusive Deals on Dining & Stores",
+    template: "%s | PassPrivé",
+  },
+  description:
+    "Discover exclusive deals on dining and stores near you. PassPrivé gives you access to the best restaurants, boutiques, and brands — all with special member benefits.",
+  keywords: [
+    "dining deals",
+    "store discounts",
+    "exclusive offers",
+    "restaurants near me",
+    "luxury shopping",
+    "PassPrivé",
+    "Mauritius restaurants",
+    "Mauritius stores",
+  ],
+  authors: [{ name: "PassPrivé" }],
+  creator: "PassPrivé",
+  publisher: "PassPrivé",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    siteName: "PassPrivé",
+    title: "PassPrivé — Exclusive Deals on Dining & Stores",
+    description:
+      "Discover exclusive deals on dining and stores near you. PassPrivé gives you access to the best restaurants, boutiques, and brands.",
+    url: SITE_URL,
+    images: [
+      {
+        url: "/passpriveLogo.png",
+        width: 1200,
+        height: 630,
+        alt: "PassPrivé",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PassPrivé — Exclusive Deals on Dining & Stores",
+    description:
+      "Discover exclusive deals on dining and stores near you with PassPrivé.",
+    images: ["/passpriveLogo.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

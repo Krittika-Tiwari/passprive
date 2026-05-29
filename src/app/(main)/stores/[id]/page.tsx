@@ -1,9 +1,40 @@
+import { cache } from 'react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { MapPin, Phone, Share2, Navigation, Globe } from 'lucide-react'
 import { getStoreBySlugOrId } from '@/lib/services/stores'
 import type { OpeningHour } from '@/lib/types/stores'
+
+const fetchStore = cache((id: string) => getStoreBySlugOrId(id))
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const data = await fetchStore(id)
+  if (!data) return {}
+
+  const { store } = data
+  const title = store.name
+  const description = store.description
+    ?? [store.category, store.subcategory].filter(Boolean).join(' · ')
+    ?? `Explore ${store.name} on PassPrivé`
+  const city = store.city ?? store.location_name
+
+  return {
+    title,
+    description: `${description}${city ? ` — ${city}` : ''}. Discover exclusive member offers at ${store.name} on PassPrivé.`,
+    openGraph: {
+      title: `${store.name} | PassPrivé`,
+      description,
+      url: `/stores/${store.slug ?? id}`,
+      images: store.cover_image ? [{ url: store.cover_image, alt: store.name }] : [],
+    },
+    alternates: {
+      canonical: `/stores/${store.slug ?? id}`,
+    },
+  }
+}
 import { PhotoGalleryProvider, PhotoGrid } from '@/components/sections/dining/PhotoGalleryClient'
 import { MenuGalleryProvider, MenuGalleryImageButton } from '@/components/sections/dining/MenuGalleryClient'
 
@@ -64,7 +95,7 @@ function QrCodeSvg() {
 
 export default async function StorePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const data = await getStoreBySlugOrId(id)
+  const data = await fetchStore(id)
   if (!data) notFound()
 
   const { store, gallery, hours, items, tags, offers } = data

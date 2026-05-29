@@ -6,11 +6,32 @@ import type {
   Review,
   ReviewSummary,
   RestaurantDetail,
+  FeaturedRestaurant,
 } from '@/lib/types/dining'
 
 const STORAGE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SELECT_FIELDS =
   'id, name, slug, description, area, city, full_address, cover_image, cost_for_two, phone, is_pure_veg, booking_enabled, menu_json, latitude, longitude'
+
+export async function getFeaturedRestaurants(limit = 8): Promise<FeaturedRestaurant[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('restaurants')
+    .select('id, name, slug, description, area, city, full_address, cover_image, cost_for_two, phone, is_pure_veg, booking_enabled, menu_json, latitude, longitude, restaurant_offers(id, badge_text, discount_value)')
+    .eq('is_active', true)
+    .limit(limit)
+  return (data ?? []) as unknown as FeaturedRestaurant[]
+}
+
+export async function getActiveRestaurants(limit = 10): Promise<Restaurant[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('restaurants')
+    .select(SELECT_FIELDS)
+    .eq('is_active', true)
+    .limit(limit)
+  return (data ?? []) as Restaurant[]
+}
 
 export async function getRestaurantBySlugOrId(slugOrId: string): Promise<RestaurantDetail> {
   const supabase = await createClient()

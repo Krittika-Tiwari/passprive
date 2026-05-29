@@ -1,3 +1,5 @@
+import { cache } from 'react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
@@ -13,6 +15,38 @@ import {
 } from 'lucide-react'
 import { getRestaurantBySlugOrId } from '@/lib/services/dining'
 import type { Review } from '@/lib/types/dining'
+
+const fetchRestaurant = cache((id: string) => getRestaurantBySlugOrId(id))
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const { restaurant, tags } = await fetchRestaurant(id)
+  if (!restaurant) return {}
+
+  const cuisineTags = tags.filter(t => t.tag_type === 'cuisine').map(t => t.tag_value)
+  const location = [restaurant.area, restaurant.city].filter(Boolean).join(', ')
+  const cuisineStr = cuisineTags.length ? cuisineTags.join(', ') : null
+  const description = [
+    restaurant.description,
+    cuisineStr && `Cuisine: ${cuisineStr}`,
+    location && `Located in ${location}`,
+    restaurant.cost_for_two && `₹${restaurant.cost_for_two} for two`,
+  ].filter(Boolean).join('. ')
+
+  return {
+    title: restaurant.name,
+    description: `${description || `Discover ${restaurant.name}`}. Book a table and unlock exclusive dining deals on PassPrivé.`,
+    openGraph: {
+      title: `${restaurant.name} | PassPrivé`,
+      description: description || `Discover ${restaurant.name} on PassPrivé`,
+      url: `/dining/${restaurant.slug ?? id}`,
+      images: restaurant.cover_image ? [{ url: restaurant.cover_image, alt: restaurant.name }] : [],
+    },
+    alternates: {
+      canonical: `/dining/${restaurant.slug ?? id}`,
+    },
+  }
+}
 import { BookingWidget } from '@/components/sections/dining/BookingWidget'
 import {
   PhotoGalleryProvider,
@@ -51,7 +85,7 @@ export default async function RestaurantPage({
 }) {
   const { id } = await params
   const { restaurant, offers, tags, reviews, reviewSummary, galleryPhotos, menuImages } =
-    await getRestaurantBySlugOrId(id)
+    await fetchRestaurant(id)
 
   if (!restaurant) notFound()
 

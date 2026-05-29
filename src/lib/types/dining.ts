@@ -80,3 +80,11 @@ export type RestaurantDetail = {
   galleryPhotos: string[]
   menuImages: string[]
 }
+
+export type FeaturedRestaurant = Restaurant & {
+  restaurant_offers: Array<{
+    id: string
+    badge_text: string | null
+    discount_value: number | null
+  }>
+}
